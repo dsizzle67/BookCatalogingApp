@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Rehan Islam" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="{% static 'bookcataloging/home.css' %}">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body>
+  <header>
+    {% include "bookcataloging/navbar.html" %}
+  </header>
+  <div class="container text-left my-4">
+    <div class="d-flex justify-content-end mb-3">
+      <a href="{% url 'bookcataloging:edit_profile' %}" class="btn btn-secondary mr-2 ">Edit Profile</a>
+      {% if user_role == "Librarian" %}
+      <a href="{% url 'bookcataloging:view_patrons' %}" class="btn btn-secondary">View Patrons</a>
+      {% endif %}
+    </div>
+    <form method="POST" enctype="multipart/form-data" id="profile-pic-form">
+      {% csrf_token %}
+      <div>
+        <img
+          src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}
+          {% else %}
+          https://static.vecteezy.com/system/resources/thumbnails/005/544/718/small_2x/profile-icon-design-free-vector.jpg{% endif %}"
+          width="200" height="200" class="bordered-image rounded-circle" alt="Profile Picture"
+          id="profile-pic-preview" />
+
+      </div>
+
+      
+      <div class="row mt-3">
+        <div class="col-md-8">
+          <h1>{{ profile.user.first_name }} {{ profile.user.last_name }}</h1>
+          <p><strong>Email:</strong> {{ profile.user.email }}</p>
+          <p><strong>Date Joined:</strong> {{ profile.user.date_joined|date:"F j, Y" }}</p>
+          <p class="lead">{{ profile.description }}</p>
+          <p><em>{{ profile.quote }}</em></p>
+        </div>
+      
+        {% if user_role == "Patron" %}
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-header text-white" style="background-color:#232d4b;">
+              Request Statuses
+            </div>
+            <ul class="list-group list-group-flush">
+              {% if pending_requests %}
+                {% for request in pending_requests|slice:":5" %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <strong>{{ request.collection.name }}</strong><br>
+                        <small>by {{ request.collection.owner }}</small>
+                      </div>
+                      <div>
+                        {% if request.is_approved %}
+                          <span class="badge badge-success">Accepted</span>
+                        {% elif request.is_denied %}
+                          <span class="badge badge-danger">Denied</span>
+                        {% else %}
+                          <span class="badge badge-secondary">Pending</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              {% else %}
+                <li class="list-group-item text-muted">No pending requests.</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+  <div style="display: flex; justify-content: space-around; margin: 20px 0">
+    <div>
+      <h3>Books Read</h3>
+      <p>{{ profile.books_read }}</p>
+    </div>
+    <div>
+      <h3>Pages Read</h3>
+      <p>{{ profile.pages_read }}</p>
+    </div>
+    <div>
+      <h3>Friends</h3>
+      <p>{{ profile.friends }}</p>
+    </div>
+  </div>
+
+
+  <script src="{% static '../static/bookcataloging/profile.js' %}" defer></script>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+<footer>
+  {% include "bookcataloging/footer.html" %}
+</footer>
+</html>
